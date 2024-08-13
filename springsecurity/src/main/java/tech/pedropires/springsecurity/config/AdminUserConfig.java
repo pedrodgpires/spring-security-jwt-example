@@ -3,13 +3,11 @@ package tech.pedropires.springsecurity.config;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.transaction.annotation.Transactional;
 import tech.pedropires.springsecurity.domain.repository.RoleRepository;
 import tech.pedropires.springsecurity.domain.repository.UserRepository;
-import org.springframework.transaction.annotation.Transactional;
 import tech.pedropires.springsecurity.domain.users.Role;
-import tech.pedropires.springsecurity.domain.users.RoleValues;
 import tech.pedropires.springsecurity.domain.users.User;
-
 
 import java.util.Optional;
 import java.util.Set;
@@ -31,19 +29,19 @@ public class AdminUserConfig implements CommandLineRunner {
 
     @Override
     @Transactional
-    public void run(String... args) throws Exception {
+    public void run(String... args) {
 
-        Role roleAdmin = roleRepository.findByName(RoleValues.ADMIN.name());
+        Role roleAdmin = roleRepository.findByName(Role.Values.ADMIN.name());
 
         Optional<User> userAdmin = userRepository.findByUsername("admin");
 
         userAdmin.ifPresentOrElse(
                 user -> System.out.println("Admin user already exists"),
                 () -> {
-                    var user = new User();
-                    user.setUsername("admin");
-                    user.setPassword(passwordEncoder.encode("123"));
-                    user.setRoles(Set.of(roleAdmin));
+                    User user = new User(
+                            "admin",
+                            passwordEncoder.encode("123"),
+                            Set.of(roleAdmin));
                     userRepository.save(user);
                 }
         );

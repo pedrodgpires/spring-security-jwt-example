@@ -39,6 +39,21 @@ public class User {
     )
     private Set<Role> roles;
 
+    /**
+     * Constructor for User
+     *
+     * @param username the username of the user
+     * @param password the password of the user
+     * @param roles the roles of the user
+     */
+    public User(String username, String password, Set<Role> roles) {
+        this.username = username;
+        this.password = password;
+        this.roles = roles;
+    }
+
+    public User() {
+    }
 
     public UUID getUserId() {
         return userId;
