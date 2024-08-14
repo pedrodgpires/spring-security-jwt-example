@@ -37,6 +37,9 @@ public class Tweet {
         this.user = user;
         this.content = content;
     }
+    public Tweet (){
+
+    }
 
 
     public Long getTweetId() {
