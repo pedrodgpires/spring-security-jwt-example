@@ -1,8 +1,5 @@
 package tech.pedropires.springsecurity.controller;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
@@ -15,17 +12,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
-import tech.pedropires.springsecurity.domain.repository.TweetRepository;
-import tech.pedropires.springsecurity.domain.repository.UserRepository;
-import tech.pedropires.springsecurity.domain.tweets.Tweet;
-import tech.pedropires.springsecurity.domain.users.Role;
-import tech.pedropires.springsecurity.domain.users.User;
 import tech.pedropires.springsecurity.dto.CreateTweetDto;
 import tech.pedropires.springsecurity.dto.FeedDto;
-import tech.pedropires.springsecurity.dto.FeedItemDto;
-
-import java.util.Optional;
-import java.util.UUID;
+import tech.pedropires.springsecurity.service.TweetService;
 
 /**
  * This class is a REST controller that handles requests related to Tweet entities.
@@ -34,18 +23,15 @@ import java.util.UUID;
 @RequestMapping("/tweets")
 public class TweetController {
 
-    private final TweetRepository tweetRepository;
-    private final UserRepository userRepository;
+    private final TweetService tweetService;
 
     /**
      * Constructor for the TweetController.
      *
-     * @param tweetRepository The TweetRepository to use.
-     * @param userRepository  The UserRepository to use.
+     * @param tweetService The TweetService to use.
      */
-    public TweetController (TweetRepository tweetRepository, UserRepository userRepository) {
-        this.tweetRepository = tweetRepository;
-        this.userRepository = userRepository;
+    public TweetController(TweetService tweetService) {
+        this.tweetService = tweetService;
     }
 
     /**
@@ -53,20 +39,16 @@ public class TweetController {
      *
      * @param tweetDto the tweet dto
      * @param token the token of the user
-     * @return a response entity with the status of the creation
+     * @return a response entity with the status of the request
      */
     @PostMapping("/new")
     public ResponseEntity<Void> createTweet(@RequestBody CreateTweetDto tweetDto,
                                             JwtAuthenticationToken token) {
-        // Find the user by the token
-        Optional<User> user = userRepository.findById(UUID.fromString(token.getName()));
-        // Check if the user exists
-        if(user.isPresent()){
-            Tweet tweet = new Tweet(user.get(), tweetDto.content());
-            tweetRepository.save(tweet);
-            return ResponseEntity.ok().build();
+        boolean created = tweetService.createTweet(tweetDto, token);
+        if (!created) {
+            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Tweet cannot be created");
         }
-        throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Tweet cannot be created");
+        return ResponseEntity.ok().build();
     }
 
     /**
@@ -79,25 +61,16 @@ public class TweetController {
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> deleteTweet(@PathVariable("id") Long tweetId,
                                             JwtAuthenticationToken token) {
-        // Find the user by the token
-        Optional<User> user = userRepository.findById(UUID.fromString(token.getName()));
-        // Check if the user is an admin, then they can delete any tweet
-        if(user.isEmpty()){
-            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "User not found");
+        try {
+            boolean deleted = tweetService.deleteTweet(tweetId, token);
+            if (deleted) {
+                return ResponseEntity.ok().build();
+            } else {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, e.getMessage());
         }
-        boolean isAdmin = user.get().getRoles()
-                .stream()
-                .anyMatch(role -> role.getName().equalsIgnoreCase(Role.Values.ADMIN.name()));
-        // Check if the tweet exists and get it
-        Tweet tweet = tweetRepository.findById(tweetId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tweet not found."));
-        // Check if the user is the owner of the tweet or an admin to delete the tweet
-        if (isAdmin || tweet.getUser().getUserId().equals(UUID.fromString(token.getName()))) {
-            tweetRepository.deleteById(tweetId);
-        } else {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
-        return ResponseEntity.ok().build();
     }
 
     /**
@@ -110,19 +83,8 @@ public class TweetController {
     @GetMapping("/feed")
     public ResponseEntity<FeedDto> getCurrentFeed(@RequestParam(value = "page", defaultValue = "0") int page,
                                                   @RequestParam(value = "size", defaultValue = "10") int size) {
-        // Get the tweets from the repository and map them to the FeedItemDto
-        // The PageRequest is used to get the tweets in a paginated way and sorted by the creationTimestamp
-        Page<FeedItemDto> tweets = tweetRepository.findAll(
-                        PageRequest.of(page, size, Sort.Direction.DESC, "creationTimestamp"))
-                .map(tweet ->
-                        new FeedItemDto(
-                                tweet.getTweetId(),
-                                tweet.getContent(),
-                                tweet.getUser().getUsername()
-                        )
-                );
-        return ResponseEntity.ok(new FeedDto(
-                tweets.getContent(), page, size, tweets.getTotalPages(), tweets.getTotalElements()));
+        FeedDto feed = tweetService.getAllTweets(page, size);
+        return ResponseEntity.ok(feed);
     }
 
 

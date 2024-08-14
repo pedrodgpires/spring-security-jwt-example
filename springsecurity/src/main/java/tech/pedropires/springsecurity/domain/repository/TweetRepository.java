@@ -7,5 +7,4 @@ import tech.pedropires.springsecurity.domain.tweets.Tweet;
 @Repository
 public interface TweetRepository extends JpaRepository<Tweet, Long> {
 
-
 }

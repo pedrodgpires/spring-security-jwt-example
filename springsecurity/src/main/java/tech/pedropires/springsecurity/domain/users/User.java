@@ -13,7 +13,7 @@ import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import tech.pedropires.springsecurity.dto.LoginRequest;
+import tech.pedropires.springsecurity.dto.LoginRequestDto;
 
 import java.util.Set;
 import java.util.UUID;
@@ -87,7 +87,7 @@ public class User {
         this.roles = roles;
     }
 
-    public boolean isLoginCorrect(LoginRequest loginRequest, PasswordEncoder passwordEncoder) {
-        return passwordEncoder.matches(loginRequest.password(), this.password);
+    public boolean isLoginCorrect(LoginRequestDto loginRequestDto, PasswordEncoder passwordEncoder) {
+        return passwordEncoder.matches(loginRequestDto.password(), this.password);
     }
 }

@@ -4,44 +4,31 @@ import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
-import tech.pedropires.springsecurity.domain.repository.RoleRepository;
-import tech.pedropires.springsecurity.domain.repository.UserRepository;
-import tech.pedropires.springsecurity.domain.users.Role;
 import tech.pedropires.springsecurity.domain.users.User;
 import tech.pedropires.springsecurity.dto.CreateUserDto;
+import tech.pedropires.springsecurity.service.UserService;
 
 import java.util.List;
-import java.util.Optional;
-import java.util.Set;
 
 @RestController()
 @RequestMapping("users")
 public class UserController {
 
-    private final UserRepository userRepository;
-    private final RoleRepository roleRepository;
-    private final BCryptPasswordEncoder passwordEncoder;
+    private final UserService userService;
 
     /**
      * Constructor for UserController
      *
-     * @param userRepository the user repository
-     * @param roleRepository the role repository of the user
-     * @param passwordEncoder the password encoder to encode the password
+     * @param userService the service to handle user operations
      */
-    public UserController(UserRepository userRepository,
-                          RoleRepository roleRepository,
-                          BCryptPasswordEncoder passwordEncoder) {
-        this.userRepository = userRepository;
-        this.roleRepository = roleRepository;
-        this.passwordEncoder = passwordEncoder;
+    public UserController(UserService userService) {
+        this.userService = userService;
     }
 
     /**
@@ -52,25 +39,19 @@ public class UserController {
     @Transactional
     @PostMapping("/new")
     public ResponseEntity<Void> newBasicUser(@RequestBody CreateUserDto createUserDto) {
-        // Get the role of the user - BASIC
-        Role basicRole = roleRepository.findByName(Role.Values.BASIC.name());
-        // Check if the username already exists
-        Optional<User> userExist = userRepository.findByUsername(createUserDto.username());
-        if (userExist.isPresent()) {
-            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "User already exists");
+        boolean created = userService.newBasicUser(createUserDto);
+        if (!created) {
+            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "User already exists.");
+        } else {
+            return ResponseEntity.ok().build();
         }
-        // Create a new basic user
-        User user = new User(createUserDto.username(), passwordEncoder.encode(createUserDto.password()), Set.of(basicRole));
-        userRepository.save(user);
-
-        return ResponseEntity.ok().build();
     }
 
 
     @GetMapping("/list-all")
     @PreAuthorize("hasAuthority('SCOPE_ADMIN')")
     public ResponseEntity<List<User>> listUsers() {
-        List<User> users = userRepository.findAll();
+        List<User> users = userService.listUsers();
         return ResponseEntity.ok(users);
     }
 }
