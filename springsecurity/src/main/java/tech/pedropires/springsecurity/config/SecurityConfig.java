@@ -50,12 +50,12 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http
-                .authorizeHttpRequests(authorize -> authorize                                     // AUTHORIZE REQUESTS
-                        .requestMatchers(HttpMethod.POST, "/new-user").permitAll()  // NEW USER ENDPOINT MUST BE PERMITTED
-                        .requestMatchers(HttpMethod.POST, "/login").permitAll()                 // LOGIN ENDPOINT MUST BE PERMITTED
-                        .anyRequest().authenticated())                                            // ANY OTHER REQUEST MUST BE AUTHENTICATED
-                .csrf(csrf -> csrf.disable())   // ONLY FOR TESTING PURPOSES
-                .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))  // JWT TOKEN
+                .authorizeHttpRequests(authorize -> authorize                              // AUTHORIZE REQUESTS
+                        .requestMatchers(HttpMethod.POST, "users/new").permitAll()       // NEW USER ENDPOINT MUST BE PERMITTED
+                        .requestMatchers(HttpMethod.POST, "login").permitAll()           // LOGIN ENDPOINT MUST BE PERMITTED
+                        .anyRequest().authenticated())                                     // ANY OTHER REQUEST MUST BE AUTHENTICATED
+                .csrf(csrf -> csrf.disable())                                              // ONLY FOR TESTING PURPOSES
+                .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))     // JWT TOKEN
                 .sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)); // STATELESS SESSION
 
         return http.build();
