@@ -17,7 +17,6 @@ import tech.pedropires.springsecurity.dto.LoginResponse;
 
 import java.time.Instant;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @RestController
@@ -29,7 +28,9 @@ public class TokenController {
 
     private BCryptPasswordEncoder passwordEncoder;
 
-    public TokenController(JwtEncoder jwtEncoder, UserRepository userRepository, BCryptPasswordEncoder passwordEncoder) {
+    public TokenController(JwtEncoder jwtEncoder,
+                           UserRepository userRepository,
+                           BCryptPasswordEncoder passwordEncoder) {
         this.jwtEncoder = jwtEncoder;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
@@ -64,11 +65,10 @@ public class TokenController {
                 .claim("scope", scopes)
                 .build();
 
-        var jwtValue = jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
+        String jwtValue = jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
 
         return ResponseEntity.ok(new LoginResponse(jwtValue, expiresIn));
     }
-
 
 }
 
