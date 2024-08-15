@@ -18,7 +18,7 @@ This project cover the major aspects of Spring Security with JWT in a real-world
   token is generated and returned to the user.
 
 Good example of the login logic in the application, in portuguese (will be translated soon):
-![img.png](images/img.png)
+![img.png](springsecurity/images/img.png)
 
 ### 2. **JWT Token Generation**
 
