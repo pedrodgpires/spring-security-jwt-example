@@ -12,6 +12,9 @@ import tech.pedropires.springsecurity.domain.users.User;
 import java.util.Optional;
 import java.util.Set;
 
+/**
+ * This class is used to configure the admin user of the application
+ */
 @Configuration
 public class AdminUserConfig implements CommandLineRunner {
 
@@ -27,6 +30,9 @@ public class AdminUserConfig implements CommandLineRunner {
         this.passwordEncoder = passwordEncoder;
     }
 
+    /**
+     * This method is used to create the admin user if it does not exist
+     */
     @Override
     @Transactional
     public void run(String... args) {
