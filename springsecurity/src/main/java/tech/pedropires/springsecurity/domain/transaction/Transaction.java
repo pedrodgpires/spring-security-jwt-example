@@ -1,5 +1,9 @@
-package tech.pedropires.springsecurity.domain.tweets;
+package tech.pedropires.springsecurity.domain.transaction;
 
+
+import java.time.Instant;
+
+import org.hibernate.annotations.CreationTimestamp;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -7,47 +11,55 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import org.hibernate.annotations.CreationTimestamp;
 import tech.pedropires.springsecurity.domain.users.User;
 
-import java.time.Instant;
-
 @Entity
-@Table(name = "tb_tweets")
-public class Tweet {
+@Table(name = "tb_transaction")
+public class Transaction {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
-    @Column(name = "tweet_id")
-    private Long tweetId;
+    @Column(name = "transaction_id")
+    private Long transactionId;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
 
-    private String content;
+    private String description;
+
+    private double value;
+
 
     @CreationTimestamp
     private Instant creationTimestamp;
 
-    public Tweet (User user, String content){
+    public Transaction (User user, double value, String description){
         this.user = user;
-        this.content = content;
-    }
-    public Tweet (){
-
+        this.value = value;
+        this.description = description;
     }
 
-
-    public Long getTweetId() {
-        return tweetId;
+    public Transaction (){
     }
 
-    public void setTweetId(Long tweetId) {
-        this.tweetId = tweetId;
+
+    public Long getTransactionId() {
+        return transactionId;
+    }
+
+    public void setTransactionId(Long tweetId) {
+        this.transactionId = tweetId;
+    }
+
+    public double getValue() {
+        return value;
+    }
+    
+    public void setValue(double value) {
+        this.value = value;
     }
 
     public User getUser() {
@@ -58,12 +70,12 @@ public class Tweet {
         this.user = user;
     }
 
-    public String getContent() {
-        return content;
+    public String getDescription() {
+        return description;
     }
 
-    public void setContent(String content) {
-        this.content = content;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public Instant getCreationTimestamp() {
@@ -73,4 +85,8 @@ public class Tweet {
     public void setCreationTimestamp(Instant creationTimestamp) {
         this.creationTimestamp = creationTimestamp;
     }
+
+
+
+    
 }

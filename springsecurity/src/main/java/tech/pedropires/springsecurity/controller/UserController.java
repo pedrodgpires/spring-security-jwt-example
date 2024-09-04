@@ -1,6 +1,7 @@
 package tech.pedropires.springsecurity.controller;
 
-import jakarta.transaction.Transactional;
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -10,11 +11,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
+
+import jakarta.transaction.Transactional;
 import tech.pedropires.springsecurity.domain.users.User;
 import tech.pedropires.springsecurity.dto.CreateUserDto;
 import tech.pedropires.springsecurity.service.UserService;
-
-import java.util.List;
 
 @RestController()
 @RequestMapping("users")
@@ -46,8 +47,11 @@ public class UserController {
             return ResponseEntity.ok().build();
         }
     }
-
-
+    
+    /**
+     * Function to list all users
+     * @return a response entity with the list of users
+     */
     @GetMapping("/list-all")
     @PreAuthorize("hasAuthority('SCOPE_ADMIN')")
     public ResponseEntity<List<User>> listUsers() {

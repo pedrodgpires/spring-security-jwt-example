@@ -1,16 +1,17 @@
 package tech.pedropires.springsecurity.config;
 
+import java.util.Optional;
+import java.util.Set;
+
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
+
 import tech.pedropires.springsecurity.domain.repository.RoleRepository;
 import tech.pedropires.springsecurity.domain.repository.UserRepository;
 import tech.pedropires.springsecurity.domain.users.Role;
 import tech.pedropires.springsecurity.domain.users.User;
-
-import java.util.Optional;
-import java.util.Set;
 
 /**
  * This class is used to configure the admin user of the application
@@ -46,7 +47,7 @@ public class AdminUserConfig implements CommandLineRunner {
                 () -> {
                     User user = new User(
                             "admin",
-                            passwordEncoder.encode("123"),
+                            passwordEncoder.encode("admin"),
                             Set.of(roleAdmin));
                     userRepository.save(user);
                 }

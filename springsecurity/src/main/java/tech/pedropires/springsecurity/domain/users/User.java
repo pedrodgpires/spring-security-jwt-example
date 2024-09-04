@@ -1,6 +1,11 @@
 package tech.pedropires.springsecurity.domain.users;
 
 
+import java.util.Set;
+import java.util.UUID;
+
+import org.springframework.security.crypto.password.PasswordEncoder;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -12,11 +17,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import tech.pedropires.springsecurity.dto.LoginRequestDto;
-
-import java.util.Set;
-import java.util.UUID;
 
 @Entity
 @Table(name = "tb_users")

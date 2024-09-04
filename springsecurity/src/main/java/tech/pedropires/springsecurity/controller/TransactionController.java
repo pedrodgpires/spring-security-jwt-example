@@ -2,6 +2,7 @@ package tech.pedropires.springsecurity.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,26 +13,27 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
-import tech.pedropires.springsecurity.dto.CreateTweetDto;
+
+import tech.pedropires.springsecurity.dto.CreateTransactionDto;
 import tech.pedropires.springsecurity.dto.FeedDto;
-import tech.pedropires.springsecurity.service.TweetService;
+import tech.pedropires.springsecurity.service.TransactionService;
 
 /**
- * This class is a REST controller that handles requests related to Tweet entities.
+ * This class is a REST controller that handles requests related to Transaction entities.
  */
 @RestController
-@RequestMapping("/tweets")
-public class TweetController {
+@RequestMapping("/transaction")
+public class TransactionController {
 
-    private final TweetService tweetService;
+    private final TransactionService transactionService;
 
     /**
-     * Constructor for the TweetController.
+     * Constructor for the TransactionController.
      *
-     * @param tweetService The TweetService to use.
+     * @param transactionService The TransactionService to use.
      */
-    public TweetController(TweetService tweetService) {
-        this.tweetService = tweetService;
+    public TransactionController(TransactionService transactionService) {
+        this.transactionService = transactionService;
     }
 
     /**
@@ -41,10 +43,28 @@ public class TweetController {
      * @param token the token of the user
      * @return a response entity with the status of the request
      */
-    @PostMapping("/new")
-    public ResponseEntity<Void> createTweet(@RequestBody CreateTweetDto tweetDto,
+    @PostMapping("/new-transaction")
+    public ResponseEntity<Void> createTransactionByClient(@RequestBody CreateTransactionDto tweetDto,
                                             JwtAuthenticationToken token) {
-        boolean created = tweetService.createTweet(tweetDto, token);
+        boolean created = transactionService.createTransaction(tweetDto, token);
+        if (!created) {
+            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Tweet cannot be created");
+        }
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * Create a new tweet for the user by an admin
+     *
+     * @param tweetDto the tweet dto
+     * @param token the token of the user
+     * @return a response entity with the status of the request
+     */
+    @PostMapping("/new-transaction-admin")
+    @PreAuthorize("hasAuthority('SCOPE_ADMIN')")
+    public ResponseEntity<Void> createTransactionByAdminForUser(@RequestBody CreateTransactionDto tweetDto,
+                                                               JwtAuthenticationToken token) {
+        boolean created = transactionService.createTransaction(tweetDto, token);
         if (!created) {
             throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Tweet cannot be created");
         }
@@ -62,7 +82,7 @@ public class TweetController {
     public ResponseEntity<Void> deleteTweet(@PathVariable("id") Long tweetId,
                                             JwtAuthenticationToken token) {
         try {
-            boolean deleted = tweetService.deleteTweet(tweetId, token);
+            boolean deleted = transactionService.deleteTweet(tweetId, token);
             if (deleted) {
                 return ResponseEntity.ok().build();
             } else {
@@ -83,7 +103,7 @@ public class TweetController {
     @GetMapping("/feed")
     public ResponseEntity<FeedDto> getCurrentFeed(@RequestParam(value = "page", defaultValue = "0") int page,
                                                   @RequestParam(value = "size", defaultValue = "10") int size) {
-        FeedDto feed = tweetService.getAllTweets(page, size);
+        FeedDto feed = transactionService.getAllTweets(page, size);
         return ResponseEntity.ok(feed);
     }
 
